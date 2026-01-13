@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Virtualenv
+venv/
+env/
+
+# VS Code
+.vscode/
+
+# LFS files will be tracked automatically
