@@ -1,6 +1,4 @@
-# To be chnages only added the code to test API
-
-def analyze_damage(pga: float, input_data):
+def analyze_damage(pga: float, input_data, distance_km: float):
     """
     Analyze damage level based on PGA value.
     Returns: (damage_level, explanation, recommended_actions)
@@ -21,9 +19,9 @@ def analyze_damage(pga: float, input_data):
         actions = "Immediate evacuation required. Contact emergency services. Do not enter building until cleared by professionals."
     
     explanation = (
-        f"PGA of {pga}g (magnitude {input_data.magnitude}, "
-        f"depth {input_data.depth}km, distance {input_data.distance_from_fault}km) "
-        f"indicates {damage.lower()} based on empirical seismic damage thresholds."
-    )
+    f"PGA of {pga}g (magnitude {input_data.magnitude}, "
+    f"depth {input_data.depth}km) "
+    f"indicates {damage.lower()} based on seismic thresholds."
+)
     
     return damage, explanation, actions
