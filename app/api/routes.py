@@ -38,3 +38,5 @@ def predict_damage(data: EarthquakeInput):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# NOTE: WebSocket endpoint removed from here - now in main.py only

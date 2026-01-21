@@ -9,7 +9,7 @@ def infer_soil_type(lat: float, lon: float, city_name: str | None = None, k: int
     - Otherwise → infer from nearest k cities
     """
 
-    # 1️⃣ Direct city match (if name provided)
+   
     if city_name:
         for entry in KNOWN_CITY_SOILS:
             if entry["city"].lower() == city_name.lower():
