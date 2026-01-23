@@ -9,7 +9,7 @@ class EarthquakeInput(BaseModel):
     )
     
     depth: float = Field(..., ge=0, 
-        le=100, 
+        le=1000, 
         description="Depth of earthquake in kilometers"
     )
     

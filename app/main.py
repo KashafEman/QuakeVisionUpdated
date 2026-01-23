@@ -4,6 +4,7 @@ from app.services.alert_engine.scheduler import start_scheduler
 from app import init_firebase
 from firebase_admin import firestore 
 from app.init_firebase import init_firebase
+from app.api.risk import router as risk_router
 
 app = FastAPI(
     title="Quake Vision Backend",
@@ -14,7 +15,6 @@ app = FastAPI(
 # Initialize Firebase
 init_firebase()
 
-# 🔴 TEMPORARY FIREBASE TEST
 db = firestore.client()
 db.collection("test").add({"status": "firebase connected"})
 

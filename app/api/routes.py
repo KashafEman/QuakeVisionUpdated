@@ -1,23 +1,29 @@
-from fastapi import APIRouter, HTTPException
+# routes.py - COMPLETE UPDATED VERSION
+from fastapi import APIRouter, FastAPI, HTTPException
 from app.schemas.input_schema import EarthquakeInput
 from app.schemas.output_schema import DamageOutput
-from app.services.pga_predictor import predict_pga
-from app.services.damage_analyzer import analyze_damage
+from app.services.damage_analyzer.pga_predictor import predict_pga
+from app.services.damage_analyzer.analyze_damage import analyze_damage
 from app.utils.geocoding import get_city_coordinates, calculate_distance_km
 from app.utils.soil_inference import infer_soil_type
 
+app = FastAPI()
 router = APIRouter()
+
 
 @router.post("/predict-damage", response_model=DamageOutput)
 def predict_damage(data: EarthquakeInput):
     try:
+        # 1️⃣ Geocoding & distance
         epi_lat, epi_lon = get_city_coordinates(data.epicenter_city)
         tgt_lat, tgt_lon = get_city_coordinates(data.target_city)
-
         distance_km = calculate_distance_km(epi_lat, epi_lon, tgt_lat, tgt_lon)
 
-        soil_type = infer_soil_type(tgt_lat, tgt_lon, city_name=data.target_city)
+        soil_type = infer_soil_type(
+            tgt_lat, tgt_lon, city_name=data.target_city
+        )
 
+        # 2️⃣ PGA Prediction
         pga_g, pga_cms2 = predict_pga(
             magnitude=data.magnitude,
             depth=data.depth,
@@ -25,18 +31,57 @@ def predict_damage(data: EarthquakeInput):
             soil_type=soil_type
         )
 
-        damage_level, explanation, actions = analyze_damage(pga_g, data, distance_km)
+        # 3️⃣ Damage logic (human-readable)
+        damage_context = {"target_city": data.target_city}
+        damage_result = analyze_damage(pga_g, damage_context)
 
+        # 4️⃣ INTERNAL analytics (NOT returned)
+        # Import inside function to avoid FastAPI schema issues
+        from app.services.damage_analyzer.vlm_service import get_damage_from_vlm
+        from app.services.damage_analyzer.maping_service import map_to_pakistan_buildings
+        from app.services.damage_analyzer.risk_service import calculate_city_wide_risk
+        
+        try:
+            vlm_result = get_damage_from_vlm(
+                pga=pga_g,
+                image_path="C:\\QuakeVision\\app\\static\\damage_curves.PNG"
+            )
+
+            # FIX: Use .dict() instead of .model_dump()
+            damage_5 = vlm_result.damage_estimates.dict()  # Changed from .model_dump()
+            
+            damage_3 = map_to_pakistan_buildings(damage_5)
+
+            calculate_city_wide_risk(
+                city_name=data.target_city,
+                damage_ratios=damage_3
+            )
+        except Exception as vlm_error:
+            # Log but don't crash if VLM fails
+            print(f"VLM skipped: {vlm_error}")
+            # Use fallback estimates based on PGA
+            damage_3 = {
+                "kacha": min(100, pga_g * 100),
+                "semi_pacca": min(80, pga_g * 80),
+                "pacca": min(40, pga_g * 40)
+            }
+            calculate_city_wide_risk(
+                city_name=data.target_city,
+                damage_ratios=damage_3
+            )
+
+        # 5️⃣ RESPONSE (schema-safe)
         return DamageOutput(
             pga=pga_g,
             pga_cms2=pga_cms2,
-            damage_level=damage_level,
-            explanation=explanation,
-            recommended_actions=actions,
+            damage_level=damage_result["damage_level"],
+            explanation=damage_result["explanation"],
+            recommended_actions=", ".join(damage_result["recommended_actions"]),
             soil_type_used=soil_type
         )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# NOTE: WebSocket endpoint removed from here - now in main.py only
+
+app.include_router(router)
