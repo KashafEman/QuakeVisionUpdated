@@ -17,3 +17,4 @@ env/
 # Firebase Admin SDK
 firebase-service-account.json
 firebase-messaging-sw.js
+serviceAccountKey.json
