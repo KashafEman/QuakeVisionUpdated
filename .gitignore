@@ -16,3 +16,4 @@ env/
 # LFS files will be tracked automatically
 # Firebase Admin SDK
 firebase-service-account.json
+firebase-messaging-sw.js
