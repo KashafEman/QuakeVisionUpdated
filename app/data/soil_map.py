@@ -36,3 +36,15 @@ KNOWN_CITY_SOILS = [
     {"city": "Skardu", "lat": 35.2971, "lon": 75.6333, "soil": "Rock/Stiff Soil"},
     {"city": "Hunza", "lat": 36.3167, "lon": 74.6500, "soil": "Rock/Stiff Soil"},
 ]
+
+def get_soil_type_by_city(city_name: str) -> str:
+    """
+    Returns soil type for a given city.
+    Defaults to 'Rock/Stiff Soil' if city is not found.
+    """
+    for entry in KNOWN_CITY_SOILS:
+        if entry["city"].lower() == city_name.lower():
+            return entry["soil"]
+
+    # Safe conservative default
+    return "Rock/Stiff Soil"

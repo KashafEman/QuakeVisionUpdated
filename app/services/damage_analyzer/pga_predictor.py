@@ -1,9 +1,15 @@
 # pga_predictor.py - FIXED VERSION
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+
 import joblib
 import pandas as pd
 import numpy as np
 from typing import Tuple
 from app.config import MODEL_PATH
+
 
 # Load ML model
 pipeline = joblib.load(MODEL_PATH)
