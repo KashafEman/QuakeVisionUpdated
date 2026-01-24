@@ -1,5 +1,6 @@
 # routes.py - COMPLETE UPDATED VERSION
 from fastapi import APIRouter, FastAPI, HTTPException
+from app.api import urban_planning
 from app.schemas.input_schema import EarthquakeInput
 from app.schemas.output_schema import DamageOutput
 from app.services.damage_analyzer.pga_predictor import predict_pga
@@ -85,3 +86,4 @@ def predict_damage(data: EarthquakeInput):
 
 
 app.include_router(router)
+app.include_router(urban_planning.router)
