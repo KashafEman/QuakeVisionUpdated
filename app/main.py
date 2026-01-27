@@ -5,6 +5,7 @@ from app import init_firebase
 from firebase_admin import firestore 
 from app.init_firebase import init_firebase
 from app.api.risk import router as risk_router
+from app.api.urban_planning import router as urban_router
 
 app = FastAPI(
     title="Quake Vision Backend",
@@ -19,6 +20,8 @@ db = firestore.client()
 db.collection("test").add({"status": "firebase connected"})
 
 app.include_router(router)
+app.include_router(urban_router)
+app.include_router(risk_router)
 start_scheduler(app)
 
 @app.get("/")

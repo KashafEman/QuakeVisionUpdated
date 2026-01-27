@@ -22,7 +22,7 @@ embeddings = HuggingFaceEmbeddings(
 print("[Developer Plan] Embeddings initialized.")
 
 vector_db = FAISS.load_local(
-    "QuakeVisionUpdated/app/faiss_index_urban_planning",
+    "app/faiss_index_urban_planning",
     embeddings,
     allow_dangerous_deserialization=True
 )

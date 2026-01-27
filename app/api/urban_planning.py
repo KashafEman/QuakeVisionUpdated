@@ -3,14 +3,14 @@ from pydantic import BaseModel
 from typing import Optional
 
 # Importing your existing logic
-from services.damage_analyzer.pga_predictor import predict_pga
-from services.damage_analyzer.vlm_service import get_damage_from_vlm
-from services.damage_analyzer.maping_service import map_to_pakistan_buildings
-from services.damage_analyzer.risk_service import calculate_sector_risk, sector_risk
-from services.damage_analyzer.map_back import map_back_to_five_categories
-from Urban_planning.recommendation_engine import generate_retrofit_plan
-from Urban_planning.developer_recommendation_engine import developer_plan
-from Urban_planning.retrofit_recommender_engine import retrofit_plan
+from app.services.damage_analyzer.pga_predictor import predict_pga
+from app.services.damage_analyzer.vlm_service import get_damage_from_vlm
+from app.services.damage_analyzer.maping_service import map_to_pakistan_buildings
+from app.services.damage_analyzer.risk_service import calculate_sector_risk, sector_risk
+from app.services.damage_analyzer.map_back import map_back_to_five_categories
+from app.Urban_planning.recommendation_engine import generate_retrofit_plan
+from app.Urban_planning.developer_recommendation_engine import developer_plan
+from app.Urban_planning.retrofit_recommender_engine import retrofit_plan
 from app.data.soil_map import get_soil_type_by_city
 
 # Initialize the router for the Urban Planning module
@@ -38,7 +38,7 @@ async def home_safety_retrofit_guide(data: RetrofitRequest):
 
         # Step B: Get Damage Estimates from VLM
         # Note: Ensure "static/damage_curves.png" path is correct relative to your main.py
-        image_path = "static/damage_curves.png"
+        image_path = "app\\static\\damage_curves.PNG"
         result = get_damage_from_vlm(pga_value, image_path)
 
         # Step C: Process Mappings
@@ -98,7 +98,7 @@ async def developer_site_planner(data: DeveloperPlanRequest):
         soil_type = get_soil_type_by_city(data.city_name)
         # Step B: Seismic Data Fetching
         pga_value = predict_pga(magnitude=data.target_magnitude, depth=10.0, distance_km=5.0, soil_type=soil_type)
-        image_path = "static/damage_curves.png"
+        image_path = "app\\static\\damage_curves.PNG"
 
         # Step C: Damage Simulation
         vlm_result = get_damage_from_vlm(pga_value, image_path)
@@ -182,7 +182,7 @@ async def regional_retrofit_strategist(data: RegionalRetrofitRequest):
         soil_type = get_soil_type_by_city(data.city_name)
         # Step B: Seismic Baseline
         pga_value = predict_pga(magnitude=data.target_magnitude, depth=10.0, distance_km=5.0, soil_type=soil_type)
-        image_path = "static/damage_curves.png"
+        image_path = "app\\static\\damage_curves.PNG"
 
         # Step C: Visual Language Model Damage Estimation
         result = get_damage_from_vlm(pga_value, image_path)
@@ -194,9 +194,14 @@ async def regional_retrofit_strategist(data: RegionalRetrofitRequest):
         # Step E: Sector-Wide Risk Assessment
         # Using sector_risk as per your provided code
         report = sector_risk(data.city_name, data.sector_name, final_mapping)
+        # Debug what sector_risk returns
+        print(f"DEBUG: Type of report: {type(report)}")
+        print(f"DEBUG: Report value: {report}")
+        print(f"DEBUG: Is report a tuple? {isinstance(report, tuple)}")
 
         # Step F: Generate Strategic Action Plan
         action_plan = retrofit_plan(
+            magnitude=data.target_magnitude,
             sector_data=report,
             retrofit_capacity=data.retrofit_capacity,
             priority_metric=data.priority_metric,
