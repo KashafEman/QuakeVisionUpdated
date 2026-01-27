@@ -195,7 +195,7 @@ async def regional_retrofit_strategist(data: RegionalRetrofitRequest):
         soil_type = get_soil_type_by_city(data.city_name)
         # Step B: Seismic Baseline
         pga_value, pga_cms2 = predict_pga(
-            magnitude=data.magnitude, 
+            magnitude=data.target_magnitude, 
             depth=10.0, 
             distance_km=5.0, 
             soil_type=soil_type
