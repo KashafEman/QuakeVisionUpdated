@@ -34,20 +34,28 @@ async def home_safety_retrofit_guide(data: RetrofitRequest):
         # Step A: Get soil type for city
         soil_type = get_soil_type_by_city(data.city_name)
         # Step A: Get PGA Value
-        pga_value = predict_pga(magnitude=data.magnitude, depth=10.0, distance_km=5.0, soil_type=soil_type)
-
+        pga_value, pga_cms2 = predict_pga(
+            magnitude=data.magnitude, 
+            depth=10.0, 
+            distance_km=5.0, 
+            soil_type=soil_type
+        )
         # Step B: Get Damage Estimates from VLM
         # Note: Ensure "static/damage_curves.png" path is correct relative to your main.py
         image_path = "app\\static\\damage_curves.PNG"
         result = get_damage_from_vlm(pga_value, image_path)
 
         # Step C: Process Mappings
-        estimates_dict = result.damage_estimates.model_dump()
+        estimates_dict = result.damage_estimates.dict()
         semi_final_mapping = map_to_pakistan_buildings(estimates_dict)
 
         # Step D: Risk Calculation and Final Categorization
         report = calculate_sector_risk(data.city_name, data.sector_name, semi_final_mapping)
+        print(f"DEBUG: Type of report: {type(report)}")
+        print(f"DEBUG: Report value: {report}")
         final_mapping = map_back_to_five_categories(report)
+        print(f"DEBUG: Type of final_mapping: {type(final_mapping)}")
+        print(f"DEBUG: Final mapping value: {final_mapping}")
 
         # Step E: Generate Retrofit Plan
         plan = generate_retrofit_plan(
@@ -97,12 +105,17 @@ async def developer_site_planner(data: DeveloperPlanRequest):
         # Step A: Get soil type for city
         soil_type = get_soil_type_by_city(data.city_name)
         # Step B: Seismic Data Fetching
-        pga_value = predict_pga(magnitude=data.target_magnitude, depth=10.0, distance_km=5.0, soil_type=soil_type)
+        pga_value, pga_cms2 = predict_pga(
+            magnitude=data.magnitude, 
+            depth=10.0, 
+            distance_km=5.0, 
+            soil_type=soil_type
+        )
         image_path = "app\\static\\damage_curves.PNG"
 
         # Step C: Damage Simulation
         vlm_result = get_damage_from_vlm(pga_value, image_path)
-        damage_dict = vlm_result.damage_estimates.model_dump()
+        damage_dict = vlm_result.damage_estimates.dict()
 
         # Step D: Mapping & Risk Calculation
         mapped_damage = map_to_pakistan_buildings(damage_dict)
@@ -181,12 +194,17 @@ async def regional_retrofit_strategist(data: RegionalRetrofitRequest):
         # Step A: Get soil type for city
         soil_type = get_soil_type_by_city(data.city_name)
         # Step B: Seismic Baseline
-        pga_value = predict_pga(magnitude=data.target_magnitude, depth=10.0, distance_km=5.0, soil_type=soil_type)
+        pga_value, pga_cms2 = predict_pga(
+            magnitude=data.magnitude, 
+            depth=10.0, 
+            distance_km=5.0, 
+            soil_type=soil_type
+        )
         image_path = "app\\static\\damage_curves.PNG"
 
         # Step C: Visual Language Model Damage Estimation
         result = get_damage_from_vlm(pga_value, image_path)
-        estimates_dict = result.damage_estimates.model_dump()
+        estimates_dict = result.damage_estimates.dict()
 
         # Step D: Pakistan Building Context Mapping
         final_mapping = map_to_pakistan_buildings(estimates_dict)
