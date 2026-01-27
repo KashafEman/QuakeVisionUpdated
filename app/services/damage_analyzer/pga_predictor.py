@@ -219,6 +219,14 @@ def apply_sanity_checks(pga_g: float, magnitude: float, distance_km: float, soil
     """
     Apply physics-based sanity checks.
     """
+    # ABSOLUTE MAXIMUM: 4.0g (as requested)
+    ABSOLUTE_MAX_PGA = 4.0
+    
+    # Apply absolute maximum limit
+    if pga_g > ABSOLUTE_MAX_PGA:
+        print(f"⚠ SANITY CHECK: PGA {pga_g:.4f}g exceeds absolute maximum of {ABSOLUTE_MAX_PGA}g, capping")
+        pga_g = ABSOLUTE_MAX_PGA
+    
     # Get expected bounds
     lower_bound, upper_bound = get_expected_bounds(magnitude, distance_km, soil_type)
     
@@ -226,7 +234,8 @@ def apply_sanity_checks(pga_g: float, magnitude: float, distance_km: float, soil
     if pga_g < lower_bound:
         return lower_bound
     elif pga_g > upper_bound:
-        return upper_bound
+        # Ensure upper bound doesn't exceed absolute maximum
+        return min(upper_bound, ABSOLUTE_MAX_PGA)
     
     return pga_g
 

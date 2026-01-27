@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, HTTPException
 from app.api.state import city_risk_cache
 from app.services.damage_analyzer.maping_service import map_to_pakistan_buildings
