@@ -3,7 +3,8 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 # 1. Setup Firebase Connection
-cred = credentials.Certificate("serviceAccountKey.json")
+# Use the full path to avoid any confusion
+cred = credentials.Certificate ( "C:\\QuakeVision\\serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 

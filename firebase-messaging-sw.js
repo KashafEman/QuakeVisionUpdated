@@ -4,11 +4,11 @@ importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js')
 
 // Initialize Firebase in the service worker
 firebase.initializeApp({
-  apiKey: "<YOUR_API_KEY>",
-  authDomain: "<YOUR_PROJECT_ID>.firebaseapp.com",
-  projectId: "<YOUR_PROJECT_ID>",
-  messagingSenderId: "<YOUR_SENDER_ID>",
-  appId: "<YOUR_APP_ID>"
+  apiKey: "AIzaSyB6KdzZT0gl7XJMB-TO79ttgU5EgKF8Sqc",
+  authDomain: "quakevision-f80bc.firebaseapp.com",
+  projectId: "quakevision-f80bc",
+  messagingSenderId: "1066517075530",
+  appId: "1:1066517075530:web:7de5ef97e48d4a5fccf8b3",
 });
 
 // Retrieve an instance of Firebase Messaging
