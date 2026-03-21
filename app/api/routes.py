@@ -1,5 +1,5 @@
-# routes.py
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException
+from app.api import urban_planning
 from app.api.state import city_risk_cache
 from datetime import datetime
 from app.schemas.input_schema import EarthquakeInput
