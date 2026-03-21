@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"
 import joblib
 import pandas as pd
 import numpy as np
-from typing import Tuple
+from typing import Tuple, List, Dict
 from app.config import MODEL_PATH
 
 
@@ -65,6 +65,90 @@ def predict_pga(
     store_predicted_pga(final_pga)
     
     return round(final_pga, 4), round(pga_cms2, 2)
+
+
+def predict_pga_range(
+    magnitude: float,
+    depth: float,
+    distance_km: float,
+    soil_type: str,
+    step: float = 0.5,
+    spread: float = 1.0
+) -> List[Dict]:
+    """
+    Predict PGA for a range of magnitudes around the input magnitude.
+
+    For a given input magnitude, this generates predictions for:
+        [magnitude - spread, ..., magnitude, ..., magnitude + spread]
+    at increments of `step`.
+
+    Args:
+        magnitude:    The user-input (central) earthquake magnitude.
+        depth:        Depth in km (same for all predictions).
+        distance_km:  Distance in km (same for all predictions).
+        soil_type:    Soil type string (same for all predictions).
+        step:         Increment between magnitude values (default 0.5).
+        spread:       How far below/above the central magnitude to go (default 1.0).
+
+    Returns:
+        A list of dicts, each containing:
+            - magnitude  (float)  : the magnitude for this prediction
+            - pga_g      (float)  : PGA in g
+            - pga_cms2   (float)  : PGA in cm/s²
+            - damage     (str)    : damage level label
+            - is_input   (bool)   : True if this entry matches the user's input magnitude
+    """
+    # Build the list of magnitudes to evaluate
+    num_steps = round(spread / step)
+    magnitudes = [
+        round(magnitude + i * step, 2)
+        for i in range(-num_steps, num_steps + 1)
+    ]
+
+    results = []
+    for mag in magnitudes:
+        # Skip physically impossible magnitudes
+        if mag <= 0:
+            continue
+
+        pga_g, pga_cms2 = predict_pga(mag, depth, distance_km, soil_type)
+        damage = classify_damage(pga_g)
+
+        results.append({
+            "magnitude": mag,
+            "pga_g": pga_g,
+            "pga_cms2": pga_cms2,
+            "damage": damage,
+            "is_input": (mag == round(magnitude, 2))
+        })
+
+    return results
+
+
+def classify_damage(pga_g: float) -> str:
+    """
+    Classify damage level based on PGA (in g).
+
+    Thresholds are based on common seismic intensity scales:
+        < 0.01g  -> No damage
+        < 0.05g  -> Minor damage
+        < 0.15g  -> Moderate damage
+        < 0.35g  -> Heavy damage
+        < 0.65g  -> Very heavy damage
+        >= 0.65g -> Catastrophic damage
+    """
+    if pga_g < 0.01:
+        return "No Damage"
+    elif pga_g < 0.05:
+        return "Minor Damage"
+    elif pga_g < 0.15:
+        return "Moderate Damage"
+    elif pga_g < 0.35:
+        return "Heavy Damage"
+    elif pga_g < 0.65:
+        return "Very Heavy Damage"
+    else:
+        return "Catastrophic Damage"
 
 
 def get_ml_prediction(magnitude: float, depth: float, distance_km: float, soil_type: str) -> float:
@@ -313,16 +397,25 @@ def inspect_model():
 if __name__ == "__main__":
     # First inspect the model
     inspect_model()
-    
-    # Then test predictions
-    test_cases = [
-        (6.5, 15, 200, "Rock"),
-    ]
-    
-    print("\nTesting Predictions:")
+
+    # --- Single prediction (original behaviour) ---
+    print("\nSingle Prediction:")
     print("=" * 50)
-    
-    for mag, depth, dist, soil in test_cases:
-        print(f"\nM{mag}, Depth={depth}km, Distance={dist}km, Soil={soil}:")
-        pga_g, pga_cms2 = predict_pga(mag, depth, dist, soil)
-        print(f"  Final: {pga_g:.4f} g ({pga_cms2:.1f} cm/s²)")
+    pga_g, pga_cms2 = predict_pga(6.5, 15, 200, "Rock")
+    print(f"M6.5 -> PGA: {pga_g:.4f} g ({pga_cms2:.1f} cm/s²)  Damage: {classify_damage(pga_g)}")
+
+    # --- Range prediction (new behaviour) ---
+    print("\nRange Predictions around M5.0:")
+    print("=" * 50)
+    results = predict_pga_range(
+        magnitude=5.0,
+        depth=15,
+        distance_km=50,
+        soil_type="Rock"
+    )
+    for r in results:
+        marker = " <-- USER INPUT" if r["is_input"] else ""
+        print(
+            f"  M{r['magnitude']:.1f} | PGA: {r['pga_g']:.4f}g "
+            f"({r['pga_cms2']:.1f} cm/s²) | {r['damage']}{marker}"
+        )
