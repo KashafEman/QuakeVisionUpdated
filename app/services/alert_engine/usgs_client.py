@@ -1,4 +1,3 @@
-
 import requests
 from typing import List, Dict
 from .config import USGS_FEED_URL

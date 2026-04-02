@@ -1,10 +1,14 @@
 # services/risk_service.py
-import firebase_admin
+import os
 from firebase_admin import credentials, firestore
+import firebase_admin
 
 # 1. Setup Firebase Connection
-# Use the full path to avoid any confusion
-cred = credentials.Certificate ( "C:\\QuakeVision\\serviceAccountKey.json")
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+cred_path = os.path.join(BASE_DIR, "serviceAccountKey.json")
+
+cred = credentials.Certificate(cred_path)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
