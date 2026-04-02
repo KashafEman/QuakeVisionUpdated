@@ -1,3 +1,4 @@
+# analyze_damage.py - UPDATED with PGA thresholds
 from app.services.damage_analyzer.maping_service import map_to_pakistan_buildings
 from app.services.damage_analyzer.risk_service import calculate_city_wide_risk
 from typing import List, Dict

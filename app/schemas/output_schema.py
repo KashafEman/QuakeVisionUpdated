@@ -2,7 +2,6 @@ from __future__ import annotations
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Literal, List , Optional , Dict , Any
 
-
 DAMAGE_LEVELS = Literal[
     "Negligible", 
     "Light", 
@@ -77,6 +76,7 @@ class DamageRangeOutput(BaseModel):
     })
 
     soil_type_used: str = Field(..., description="Soil type used for all predictions")
+
     results: List[DamageRangeItem] = Field(..., description="Damage results for each magnitude in the range")
 
 class ReportResponse(BaseModel):
