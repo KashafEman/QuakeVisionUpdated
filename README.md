@@ -1,3 +1,11 @@
+---
+title: QuakeVision Backend
+emoji: 🌍
+colorFrom: red
+colorTo: orange
+sdk: docker
+pinned: false
+---
 # QuakeVision - Earthquake Damage Prediction API
 
 An API for predicting earthquake damage based on seismic parameters and soil type.
